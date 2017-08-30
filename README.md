@@ -40,7 +40,7 @@ And change directories to the newly cloned repo:
 
 It is recommended to checkout a milestone release tag of Corda. To do this you must run: 
 
-    git checkout -b [your-branch-name] release-M14
+    git checkout -b [your-branch-name] release-M15
 
 ### Snapshots
 
