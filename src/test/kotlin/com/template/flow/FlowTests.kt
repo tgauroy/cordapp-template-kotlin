@@ -1,6 +1,8 @@
 package com.template.flow
 
-import com.template.Responder
+
+
+import com.etc.SaleCreateResponder
 import net.corda.node.internal.StartedNode
 import net.corda.testing.node.MockNetwork
 import net.corda.testing.node.MockNetwork.MockNode
@@ -20,7 +22,7 @@ class FlowTests {
         a = nodes.partyNodes[0]
         b = nodes.partyNodes[1]
         nodes.partyNodes.forEach {
-            it.registerInitiatedFlow(Responder::class.java)
+            it.registerInitiatedFlow(SaleCreateResponder::class.java)
         }
         network.runNetwork()
     }
