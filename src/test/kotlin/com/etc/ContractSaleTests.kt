@@ -32,12 +32,12 @@ class ContractSaleTests {
     }
 
     @Test
-    fun salecontract_in_error_if_status_is_not_proposed(){
+    fun salecontract_in_error_if_status_is_not_proposed() {
         val inState = getDefaultSaleContract()
         ledger {
             transaction {
                 attachments(SALE_CONTRACT_ID)
-                output(SALE_CONTRACT_ID, inState.reject(buyerTest))
+                output(SALE_CONTRACT_ID, inState.reject())
                 command(sellerKeyPair.public) { SalesContract.SaleCommands.Create() }
                 this `fails with` "Contract can only be created with status proposed"
 
@@ -51,8 +51,8 @@ class ContractSaleTests {
         ledger {
             transaction {
                 attachments(SALE_CONTRACT_ID)
-                input(SALE_CONTRACT_ID){inState.accept("fakeSign", buyerTest)}
-                command(buyerKeyPair.public) { SalesContract.SaleCommands.Update() }
+                output(SALE_CONTRACT_ID) { inState.accept() }
+                command(buyerKeyPair.public) { SalesContract.SaleCommands.Accept() }
                 this.verifies()
 
             }
@@ -60,13 +60,27 @@ class ContractSaleTests {
     }
 
     @Test
-    fun buyer_cannot_accept_rejected_contract(){
+    fun celler_cannot_accept_contract() {
         val inState = getDefaultSaleContract()
         ledger {
             transaction {
                 attachments(SALE_CONTRACT_ID)
-                input(SALE_CONTRACT_ID, inState.reject(buyerTest))
-                output(SALE_CONTRACT_ID, inState.accept("fakeSign", sellerTest))
+                output(SALE_CONTRACT_ID) { inState.accept() }
+                command(sellerKeyPair.public) { SalesContract.SaleCommands.Accept() }
+                this `fails with` "Only Buyer Can accept Contract"
+
+            }
+        }
+    }
+
+    @Test
+    fun buyer_cannot_accept_rejected_contract() {
+        val inState = getDefaultSaleContract()
+        ledger {
+            transaction {
+                attachments(SALE_CONTRACT_ID)
+                input(SALE_CONTRACT_ID, inState.reject())
+                output(SALE_CONTRACT_ID, inState.accept())
                 command(sellerKeyPair.public) { SalesContract.SaleCommands.Update() }
                 this `fails with` "Cannot update rejected Contract"
 

@@ -1,7 +1,6 @@
 package com.etc
 
 
-import com.nhaarman.mockito_kotlin.isNotNull
 import io.restassured.RestAssured.given
 import io.restassured.http.ContentType.JSON
 import org.hamcrest.MatcherAssert.assertThat
@@ -39,12 +38,21 @@ class IntegrationTestSmartLC {
             arg5: F
     ): FlowHandle<T> = startFlowDynamic(R::class.java, arg0, arg1, arg2, arg3, arg4, arg5)
 
-    var webServerPort: Int = 0
+    var sellerWebServerPort: Int = 0
+    var buyerWebServerPort: Int = 0
 
     class TestSaleContract {
         var buyer: String? = null
         var seller: String? = null
         var contractData: String? = null
+    }
+
+    fun return_sale_Contract_to_create(): TestSaleContract {
+        val testSale = TestSaleContract()
+        testSale.seller = "Alice Corp"
+        testSale.buyer = "Bob Plc"
+        testSale.contractData = "data"
+        return testSale
     }
 
     @Test
@@ -59,7 +67,7 @@ class IntegrationTestSmartLC {
             ).transpose().getOrThrow()
 
             val ws = startWebserver(sellerNode).getOrThrow()
-            webServerPort = ws.listenAddress.port
+            sellerWebServerPort = ws.listenAddress.port
             assertNotNull(ws.process)
         }
     }
@@ -77,60 +85,12 @@ class IntegrationTestSmartLC {
             ).transpose().getOrThrow()
 
             val ws = startWebserver(sellerNode).getOrThrow()
-            webServerPort = ws.listenAddress.port
-            val statusCode = given().baseUri("http://localhost:" + webServerPort)
+            sellerWebServerPort = ws.listenAddress.port
+            val statusCode = given().baseUri("http://localhost:" + sellerWebServerPort)
                     .contentType(JSON).`when`().get("api/sale/saleGetEndpoint").statusCode()
             assertThat(statusCode, `is`(200))
         }
     }
-
-    @Test
-    fun `should be able to create a sale contract from API`() {
-
-        val testSale = TestSaleContract()
-        testSale.seller = "Alice Corp"
-        testSale.buyer = "Bob Plc"
-        testSale.contractData = "data"
-
-        driver(isDebug = true) {
-            val seller = User("seller", "testPassword1", permissions = setOf(
-                    startFlowPermission<SaleCreateFlow>()
-            ))
-
-            val buyer = User("buyer", "testPassword1", permissions = setOf(
-                    startFlowPermission<SaleCreateFlow>()
-            ))
-
-            val (sellerNode, buyerNode, notaryNode) = listOf(
-                    startNode(providedName = ALICE.name, rpcUsers = listOf(seller)),
-                    startNode(providedName = BOB.name, rpcUsers = listOf(buyer)),
-                    startNode(providedName = DUMMY_NOTARY.name, advertisedServices = setOf(ServiceInfo(ValidatingNotaryService.type)))
-            ).transpose().getOrThrow()
-
-            val ws = startWebserver(sellerNode).getOrThrow()
-            webServerPort = ws.listenAddress.port
-            given().baseUri("http://localhost:" + webServerPort)
-                    .contentType(JSON).content(testSale).`when`().post("api/sale/createSaleContract").then().statusCode(201)
-
-
-            val sellerClient = sellerNode.rpcClientToNode()
-            val sellerProxy: CordaRPCOps = sellerClient.start("seller", "testPassword1").proxy
-
-            val buyerClient = buyerNode.rpcClientToNode()
-            val buyerProxy = buyerClient.start("buyer", "testPassword1").proxy
-
-            sellerProxy.waitUntilNetworkReady().getOrThrow()
-            buyerProxy.waitUntilNetworkReady().getOrThrow()
-
-            val generalCriteria = QueryCriteria.VaultQueryCriteria(Vault.StateStatus.ALL)
-
-            val result = sellerProxy.vaultQueryByCriteria(generalCriteria, SalesState::class.java)
-
-            assertThat(result.statesMetadata.first(), `is`(IsNull.notNullValue()))
-
-        }
-    }
-
 
     @Test
     fun `should throw error if one of PArty not exist during create contract `() {
@@ -156,13 +116,112 @@ class IntegrationTestSmartLC {
             ).transpose().getOrThrow()
 
             val ws = startWebserver(sellerNode).getOrThrow()
-            webServerPort = ws.listenAddress.port
-            val statusCode = given().baseUri("http://localhost:" + webServerPort)
+            sellerWebServerPort = ws.listenAddress.port
+            val statusCode = given().baseUri("http://localhost:" + sellerWebServerPort)
                     .contentType(JSON).content(testSale).`when`().post("api/sale/createSaleContract").statusCode()
             assertThat(statusCode, `is`(403))
 
         }
     }
+
+
+    @Test
+    fun `should be able to create a sale contract from API`() {
+
+        val testSale = return_sale_Contract_to_create()
+
+        driver(isDebug = true) {
+            val seller = User("seller", "testPassword1", permissions = setOf(
+                    startFlowPermission<SaleCreateFlow>()
+            ))
+
+            val buyer = User("buyer", "testPassword1", permissions = setOf(
+                    startFlowPermission<SaleCreateFlow>()
+            ))
+
+            val (sellerNode, buyerNode, notaryNode) = listOf(
+                    startNode(providedName = ALICE.name, rpcUsers = listOf(seller)),
+                    startNode(providedName = BOB.name, rpcUsers = listOf(buyer)),
+                    startNode(providedName = DUMMY_NOTARY.name, advertisedServices = setOf(ServiceInfo(ValidatingNotaryService.type)))
+            ).transpose().getOrThrow()
+
+            val ws = startWebserver(sellerNode).getOrThrow()
+            sellerWebServerPort = ws.listenAddress.port
+            given().baseUri("http://localhost:" + sellerWebServerPort)
+                    .contentType(JSON).content(testSale).`when`().post("api/sale/createSaleContract").then().statusCode(201)
+
+
+            val sellerClient = sellerNode.rpcClientToNode()
+            val sellerProxy: CordaRPCOps = sellerClient.start("seller", "testPassword1").proxy
+
+            val buyerClient = buyerNode.rpcClientToNode()
+            val buyerProxy = buyerClient.start("buyer", "testPassword1").proxy
+
+            sellerProxy.waitUntilNetworkReady().getOrThrow()
+            buyerProxy.waitUntilNetworkReady().getOrThrow()
+
+            val generalCriteria = QueryCriteria.VaultQueryCriteria(Vault.StateStatus.ALL)
+
+            val result = sellerProxy.vaultQueryByCriteria(generalCriteria, SalesState::class.java)
+
+            assertThat(result.statesMetadata.first(), `is`(IsNull.notNullValue()))
+
+        }
+    }
+
+    @Test
+    fun `buyer should be able to accept a sale contract over API`() {
+
+        val testSale = return_sale_Contract_to_create()
+
+        driver(isDebug = true) {
+            val seller = User("seller", "testPassword1", permissions = setOf(
+                    startFlowPermission<SaleCreateFlow>()
+            ))
+
+            val buyer = User("buyer", "testPassword1", permissions = setOf(
+                    startFlowPermission<SaleCreateFlow>()
+            ))
+
+            val (sellerNode, buyerNode, notaryNode) = listOf(
+                    startNode(providedName = ALICE.name, rpcUsers = listOf(seller)),
+                    startNode(providedName = BOB.name, rpcUsers = listOf(buyer)),
+                    startNode(providedName = DUMMY_NOTARY.name, advertisedServices = setOf(ServiceInfo(ValidatingNotaryService.type)))
+            ).transpose().getOrThrow()
+
+            val wsSeller = startWebserver(sellerNode).getOrThrow()
+            sellerWebServerPort = wsSeller.listenAddress.port
+            var createResult = given().baseUri("http://localhost:" + sellerWebServerPort)
+                    .contentType(JSON).content(testSale).`when`().post("api/sale/createSaleContract").body().jsonPath()
+
+            // "id" : "51FDE36F53DA34FE5050BB042FE2C50E41D9FA0C55EA42AC9C8B38A614D8B8A4",
+
+
+            var contractId = createResult.get<HashMap<String, String>>("transaction").get("id")
+
+            val wsBuyer = startWebserver(buyerNode).getOrThrow()
+            buyerWebServerPort = wsBuyer.listenAddress.port
+            given().baseUri("http://localhost:" + buyerWebServerPort)
+                    .contentType(JSON).content(contractId).`when`().post("api/sale/acceptSaleContract").then().statusCode(201)
+
+            val sellerClient = sellerNode.rpcClientToNode()
+            val sellerProxy: CordaRPCOps = sellerClient.start("seller", "testPassword1").proxy
+
+            val buyerClient = buyerNode.rpcClientToNode()
+            val buyerProxy = buyerClient.start("buyer", "testPassword1").proxy
+
+            sellerProxy.waitUntilNetworkReady().getOrThrow()
+            buyerProxy.waitUntilNetworkReady().getOrThrow()
+
+            val generalCriteria = QueryCriteria.VaultQueryCriteria(Vault.StateStatus.ALL)
+
+            val result = sellerProxy.vaultQueryByCriteria(generalCriteria, SalesState::class.java)
+
+            assertThat(result.states.stream().anyMatch { state -> state.state.data.status == (SalesState.Status.ACCEPTED) }, `is`(true))
+
+        }
+    }
+
 
 
     @Test

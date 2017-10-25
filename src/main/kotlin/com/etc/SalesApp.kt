@@ -4,8 +4,10 @@ import co.paralleluniverse.fibers.Suspendable
 import net.corda.core.contracts.*
 import net.corda.core.flows.*
 import net.corda.core.identity.Party
+import net.corda.core.internal.noneOrSingle
 import net.corda.core.messaging.CordaRPCOps
 import net.corda.core.messaging.startFlow
+import net.corda.core.messaging.vaultQueryBy
 import net.corda.core.serialization.SerializationWhitelist
 import net.corda.core.transactions.LedgerTransaction
 import net.corda.core.transactions.SignedTransaction
@@ -41,6 +43,35 @@ class SalesContractApi(val rpc: CordaRPCOps) {
         return Response.ok("Sale contract GET endpoint.").build()
     }
 
+
+    //acceptSaleContract
+    @POST
+    @Path("acceptSaleContract")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    fun acceptSaleContractBuyer(contractId: String): Response {
+
+
+        val results = rpc.vaultQueryBy<SalesState>()
+
+        return try {
+
+            val txState = results.states.firstOrNull { currentState ->
+                currentState.ref.txhash.toString().equals(contractId)
+            }
+
+            if (txState != null) {
+                val id = rpc.startFlow(::AcceptContractFlow, txState)
+                        .returnValue.getOrThrow()
+                Response.status(Response.Status.CREATED).entity(id).build()
+            } else {
+                return Response.status(Response.Status.NOT_FOUND).build()
+            }
+        } catch (e: Exception) {
+            return Response.status(Response.Status.FORBIDDEN).build()
+        }
+
+    }
 
     // Accessible at /api/sale/createSaleContract.
     @POST
@@ -83,6 +114,8 @@ class SalesContract : Contract {
     interface SaleCommands : CommandData {
         class Create : TypeOnlyCommandData(), SaleCommands
         class Update : TypeOnlyCommandData(), SaleCommands
+        class Accept : TypeOnlyCommandData(), SaleCommands
+        class Reject : TypeOnlyCommandData(), SaleCommands
     }
 
     override fun verify(tx: LedgerTransaction) {
@@ -94,20 +127,41 @@ class SalesContract : Contract {
         for ((inputs, outputs, key) in groups) {
             when (command.value) {
                 is SaleCommands.Create -> {
-                    val output = outputs.single()
-                    requireThat {
-                        "Buyer cannot be a seller for a transaction" using (output.sellerIsNotBuyer())
-                        "Contract can only be created with status proposed" using (output.status == SalesState.Status.PROPOSED)
+                    val output = outputs.noneOrSingle()
+                    if (output != null) {
+                        requireThat {
+                            "Buyer cannot be a seller for a transaction" using (output.sellerIsNotBuyer())
+                            "Contract can only be created with status proposed" using (output.status == SalesState.Status.PROPOSED)
+                        }
                     }
+
                 }
 
                 is SaleCommands.Update -> {
-                    val input = inputs.single()
-                    requireThat {
-                        "Cannot update rejected Contract" using (input.status != SalesState.Status.REJECTED)
+                    val input = inputs.noneOrSingle()
+                    if (input != null) {
+                        requireThat {
+                            "Cannot update rejected Contract" using (input.status != SalesState.Status.REJECTED)
+                        }
                     }
                 }
 
+                is SaleCommands.Accept -> {
+                    val output = outputs.noneOrSingle()
+                    if (output != null) {
+                        requireThat {
+                            "Only Buyer Can accept Contract" using (command.signers.first().equals(output.buyer.owningKey))
+                        }
+                    }
+                }
+                is SaleCommands.Reject -> {
+                    val output = outputs.noneOrSingle()
+                    if (output != null) {
+                        requireThat {
+                            "Only Buyer Can reject Contract" using (command.signers.first().equals(output.buyer.owningKey))
+                        }
+                    }
+                }
             }
         }
     }
@@ -140,18 +194,12 @@ data class SalesState(
         return !buyer.equals(seller)
     }
 
-    fun accept(hash_signature: String, sender: Party): ContractState {
-        if (sender.equals(buyer)) {
-            return copy(status = Status.ACCEPTED, signatureBuyer = hash_signature)
-        }
-        return copy()
+    fun accept(): ContractState {
+        return copy(status = Status.ACCEPTED)
     }
 
-    fun reject(sender: Party): ContractState {
-        if (sender.equals(buyer) && status != Status.ACCEPTED) {
-            return copy(status = Status.REJECTED)
-        }
-        return copy()
+    fun reject(): ContractState {
+        return copy(status = Status.REJECTED)
     }
 
 
@@ -181,35 +229,79 @@ class SaleCreateResponder(val otherPartySession: FlowSession) : FlowLogic<Unit>(
     }
 }
 
+@StartableByRPC
+class AcceptContractFlow(val stateAndRef: StateAndRef<SalesState>) : FlowLogic<SignedTransaction>() {
+
+    companion object {
+        object WAIT_FOR_ACCEPTANCE_CONTRACT : ProgressTracker.Step("Search Contract into ledger")
+        object ACCEPT_CONTRACT : ProgressTracker.Step("Sale Contract approved")
+        object REJECT_CONTRACT : ProgressTracker.Step("Sale Contract rejected")
+
+        fun tracker() = ProgressTracker(WAIT_FOR_ACCEPTANCE_CONTRACT, ACCEPT_CONTRACT, REJECT_CONTRACT)
+    }
+
+    override val progressTracker = AcceptContractFlow.tracker()
+
+    @Suspendable
+    override fun call(): SignedTransaction {
+
+        progressTracker.currentStep = AcceptContractFlow.Companion.WAIT_FOR_ACCEPTANCE_CONTRACT
+
+        val notary = serviceHub.networkMapCache.notaryIdentities[0]
+        val txBuilder = TransactionBuilder(notary = notary)
+        txBuilder.addInputState(stateAndRef)
+
+        val saleState = stateAndRef.state.data
+
+        val outputState = saleState.accept()
+        val outputContract = SalesContract::class.jvmName
+        val outputContractAndState = StateAndContract(outputState, outputContract)
+        val contractHash = serviceHub.cordappProvider.getContractAttachmentID(SalesContract::class.jvmName)
+        val cmd = Command(SalesContract.SaleCommands.Accept(), serviceHub.myInfo.legalIdentities.first().owningKey)
+
+
+        // We add the items to the builder.
+        if (contractHash != null) {
+            txBuilder.withItems(outputContractAndState, cmd, contractHash)
+        }
+
+        // Verifying the transaction.
+        txBuilder.verify(serviceHub)
+
+
+        val signedTx = serviceHub.signInitialTransaction(txBuilder)
+
+        progressTracker.currentStep = AcceptContractFlow.Companion.ACCEPT_CONTRACT
+
+        //seller sign
+        val otherpartySession = initiateFlow(saleState.seller)
+        val fullySignedTx = subFlow(CollectSignaturesFlow(signedTx, listOf(otherpartySession), CollectSignaturesFlow.tracker()))
+
+        // Finalising the transaction.
+        return subFlow(FinalityFlow(fullySignedTx))
+    }
+
+}
+
 
 @InitiatingFlow
 @StartableByRPC
 /*Seller propose Global terme and condition to Buyer*/
 class SaleCreateFlow(val buyer: Party,
                      val seller: Party,
-                     val hash: String) : FlowLogic<Unit>() {
+                     val hash: String) : FlowLogic<SignedTransaction>() {
 
     companion object {
         object WAITING_SALE_CONTRACT_PROPOSITION : ProgressTracker.Step("Waiting for proposition")
-
         object PROPOSAL_FROM_SELLER : ProgressTracker.Step("Seller propose sale contract")
 
-        object VERIFYING_AND_APPROVE_BY_BUYER : ProgressTracker.Step("Buyer Approved sale contract") {
-            override fun childProgressTracker() = SignTransactionFlow.tracker()
-        }
-
-        object VERIFYING_AND_REJECT_BY_BUYER : ProgressTracker.Step("Buyer reject sale contract") {
-            override fun childProgressTracker() = SignTransactionFlow.tracker()
-        }
-
-
-        fun tracker() = ProgressTracker(WAITING_SALE_CONTRACT_PROPOSITION, PROPOSAL_FROM_SELLER, VERIFYING_AND_APPROVE_BY_BUYER, VERIFYING_AND_REJECT_BY_BUYER)
+        fun tracker() = ProgressTracker(WAITING_SALE_CONTRACT_PROPOSITION, PROPOSAL_FROM_SELLER)
     }
 
     override val progressTracker = tracker()
 
     @Suspendable
-    override fun call() {
+    override fun call(): SignedTransaction {
 
         progressTracker.currentStep = WAITING_SALE_CONTRACT_PROPOSITION
 
@@ -238,10 +330,8 @@ class SaleCreateFlow(val buyer: Party,
         val otherpartySession = initiateFlow(buyer)
         val fullySignedTx = subFlow(CollectSignaturesFlow(signedTx, listOf(otherpartySession), CollectSignaturesFlow.tracker()))
 
-
         // Finalising the transaction.
-        subFlow(FinalityFlow(fullySignedTx))
-
+        return subFlow(FinalityFlow(fullySignedTx))
 
     }
 }
