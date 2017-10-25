@@ -27,6 +27,33 @@ import kotlin.test.assertNotNull
 
 class IntegrationTestSmartLC {
 
+//    companion object InitforTests : NodeBasedTest() {
+//
+//
+//        lateinit var sellerNode: Node
+//        lateinit var buyerNode: Node
+//        lateinit var notaryNode: Node
+//
+//        lateinit var sellerWs: WebserverHandle
+//
+//        val seller = User("seller", "testPassword1", permissions = setOf(
+//                startFlowPermission<SaleCreateFlow>()
+//        ))
+//
+//        val buyer = User("buyer", "testPassword1", permissions = setOf(
+//                startFlowPermission<SaleCreateFlow>()
+//        ))
+//
+//        @BeforeClass
+//        @JvmStatic
+//        fun `start nodes needed for tests`() {
+//            sellerNode = startNode(ALICE.name, rpcUsers = listOf(seller)).getOrThrow().internals
+//            buyerNode = startNode(BOB.name, rpcUsers = listOf(buyer)).getOrThrow().internals
+//            notaryNode = startNotaryCluster(DUMMY_NOTARY.name, 1, ValidatingNotaryService.type).getOrThrow().first().internals
+//
+//        }
+//    }
+
     inline fun <T : Any, A, B, C, D, E, F, reified R : FlowLogic<T>> CordaRPCOps.startFlow4(
             @Suppress("UNUSED_PARAMETER")
             flowConstructor: (A, B, C, D, E, F) -> R,
@@ -174,7 +201,7 @@ class IntegrationTestSmartLC {
 
         val testSale = return_sale_Contract_to_create()
 
-        driver(isDebug = true) {
+        driver {
             val seller = User("seller", "testPassword1", permissions = setOf(
                     startFlowPermission<SaleCreateFlow>()
             ))
@@ -222,6 +249,58 @@ class IntegrationTestSmartLC {
         }
     }
 
+    @Test
+    fun `buyer should be able to reject a sale contract over API`() {
+
+        val testSale = return_sale_Contract_to_create()
+
+        driver {
+            val seller = User("seller", "testPassword1", permissions = setOf(
+                    startFlowPermission<SaleCreateFlow>()
+            ))
+
+            val buyer = User("buyer", "testPassword1", permissions = setOf(
+                    startFlowPermission<SaleCreateFlow>()
+            ))
+
+            val (sellerNode, buyerNode, notaryNode) = listOf(
+                    startNode(providedName = ALICE.name, rpcUsers = listOf(seller)),
+                    startNode(providedName = BOB.name, rpcUsers = listOf(buyer)),
+                    startNode(providedName = DUMMY_NOTARY.name, advertisedServices = setOf(ServiceInfo(ValidatingNotaryService.type)))
+            ).transpose().getOrThrow()
+
+            val wsSeller = startWebserver(sellerNode).getOrThrow()
+            sellerWebServerPort = wsSeller.listenAddress.port
+            var createResult = given().baseUri("http://localhost:" + sellerWebServerPort)
+                    .contentType(JSON).content(testSale).`when`().post("api/sale/createSaleContract").body().jsonPath()
+
+            // "id" : "51FDE36F53DA34FE5050BB042FE2C50E41D9FA0C55EA42AC9C8B38A614D8B8A4",
+
+
+            var contractId = createResult.get<HashMap<String, String>>("transaction").get("id")
+
+            val wsBuyer = startWebserver(buyerNode).getOrThrow()
+            buyerWebServerPort = wsBuyer.listenAddress.port
+            given().baseUri("http://localhost:" + buyerWebServerPort)
+                    .contentType(JSON).content(contractId).`when`().post("api/sale/rejectSaleContract").then().statusCode(201)
+
+            val sellerClient = sellerNode.rpcClientToNode()
+            val sellerProxy: CordaRPCOps = sellerClient.start("seller", "testPassword1").proxy
+
+            val buyerClient = buyerNode.rpcClientToNode()
+            val buyerProxy = buyerClient.start("buyer", "testPassword1").proxy
+
+            sellerProxy.waitUntilNetworkReady().getOrThrow()
+            buyerProxy.waitUntilNetworkReady().getOrThrow()
+
+            val generalCriteria = QueryCriteria.VaultQueryCriteria(Vault.StateStatus.ALL)
+
+            val result = sellerProxy.vaultQueryByCriteria(generalCriteria, SalesState::class.java)
+
+            assertThat(result.states.stream().anyMatch { state -> state.state.data.status == (SalesState.Status.REJECTED) }, `is`(true))
+
+        }
+    }
 
 
     @Test

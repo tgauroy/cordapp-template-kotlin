@@ -43,6 +43,34 @@ class SalesContractApi(val rpc: CordaRPCOps) {
         return Response.ok("Sale contract GET endpoint.").build()
     }
 
+    @POST
+    @Path("rejectSaleContract")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    fun rejectSaleContractBuyer(contractId: String): Response {
+
+
+        val results = rpc.vaultQueryBy<SalesState>()
+
+        return try {
+
+            val txState = results.states.firstOrNull { currentState ->
+                currentState.ref.txhash.toString().equals(contractId)
+            }
+
+            if (txState != null) {
+                val id = rpc.startFlow(::RejectContractFlow, txState)
+                        .returnValue.getOrThrow()
+                Response.status(Response.Status.CREATED).entity(id).build()
+            } else {
+                return Response.status(Response.Status.NOT_FOUND).build()
+            }
+        } catch (e: Exception) {
+            return Response.status(Response.Status.FORBIDDEN).build()
+        }
+
+    }
+
 
     //acceptSaleContract
     @POST
@@ -227,6 +255,59 @@ class SaleCreateResponder(val otherPartySession: FlowSession) : FlowLogic<Unit>(
 
         subFlow(signTransactionFlow)
     }
+}
+
+@StartableByRPC
+class RejectContractFlow(val stateAndRef: StateAndRef<SalesState>) : FlowLogic<SignedTransaction>() {
+
+    companion object {
+        object WAIT_FOR_ACCEPTANCE_CONTRACT : ProgressTracker.Step("Search Contract into ledger")
+        object REJECT_CONTRACT : ProgressTracker.Step("Sale Contract rejected")
+
+        fun tracker() = ProgressTracker(WAIT_FOR_ACCEPTANCE_CONTRACT, REJECT_CONTRACT)
+    }
+
+    override val progressTracker = RejectContractFlow.tracker()
+
+    @Suspendable
+    override fun call(): SignedTransaction {
+
+        progressTracker.currentStep = RejectContractFlow.Companion.WAIT_FOR_ACCEPTANCE_CONTRACT
+
+        val notary = serviceHub.networkMapCache.notaryIdentities[0]
+        val txBuilder = TransactionBuilder(notary = notary)
+        txBuilder.addInputState(stateAndRef)
+
+        val saleState = stateAndRef.state.data
+
+        val outputState = saleState.reject()
+        val outputContract = SalesContract::class.jvmName
+        val outputContractAndState = StateAndContract(outputState, outputContract)
+        val contractHash = serviceHub.cordappProvider.getContractAttachmentID(SalesContract::class.jvmName)
+        val cmd = Command(SalesContract.SaleCommands.Reject(), serviceHub.myInfo.legalIdentities.first().owningKey)
+
+
+        // We add the items to the builder.
+        if (contractHash != null) {
+            txBuilder.withItems(outputContractAndState, cmd, contractHash)
+        }
+
+        // Verifying the transaction.
+        txBuilder.verify(serviceHub)
+
+
+        val signedTx = serviceHub.signInitialTransaction(txBuilder)
+
+        progressTracker.currentStep = RejectContractFlow.Companion.REJECT_CONTRACT
+
+        //seller sign
+        val otherpartySession = initiateFlow(saleState.seller)
+        val fullySignedTx = subFlow(CollectSignaturesFlow(signedTx, listOf(otherpartySession), CollectSignaturesFlow.tracker()))
+
+        // Finalising the transaction.
+        return subFlow(FinalityFlow(fullySignedTx))
+    }
+
 }
 
 @StartableByRPC
