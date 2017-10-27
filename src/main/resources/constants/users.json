@@ -1,0 +1,422 @@
+[
+  {
+    "userName": "jason.smart@etc.com",
+    "displayName": "Jason",
+    "fullName": "Jason Smart",
+    "password": "Elephant45",
+    "etcToken": {
+      "roles": [
+        {
+          "role": "OPERATOR",
+          "valid": true
+        }
+      ],
+      "corpid": "jason.smart@etc.com",
+      "uportid": "",
+      "expirydate": null,
+      "activesince": null,
+      "state": "ACTIVE"
+    },
+    "signedEtcTokenByCorp": "0x7e4d8b35bae510f4a2c5c268bd8fc97081c6c76b4ae19d4baa8e34179d6b1cc514a59becc3e3ceb50d575ec2656240a226f088fcdef06a9468ceec329310f9551c",
+    "roleKeyMapping": {
+      "OPERATOR": "0xecd5a22c87e3b11094e6b10f441b412e9683b744"
+    },
+    "signedRoleKeyMapping": "",
+    "corporateAddress": "0x389d17b4a0449f86944cc7e0534dac2327f4f3ff",
+    "corp": "ING",
+    "branch": "ING Bank",
+    "userType": "OPERATOR"
+  },
+  {
+    "userName": "jeffrey.steward@etc.com",
+    "fullName": "Jeffrey Steward",
+    "displayName": "Jeffrey",
+    "password": "12Duck",
+    "etcToken": {
+      "roles": [
+        {
+          "role": "APPROVER",
+          "valid": true
+        }
+      ],
+      "corpid": "jeffrey.steward@etc.com",
+      "uportid": "",
+      "expirydate": null,
+      "activesince": null,
+      "state": "ACTIVE"
+    },
+    "signedEtcTokenByCorp": "0x1a058a9f23c8fdf4833f73aec144921536558c349ed2d21d7fc1c81198db2b84688038edd575d212177355007584e9081b77bcadf8e01ce4ff410a66069ab3271b",
+    "roleKeyMapping": {
+      "APPROVER": "0x8bcbc9875315010f3f4f82760637fdc0e9b3d888"
+    },
+    "signedRoleKeyMapping": "",
+    "corporateAddress": "0x389d17b4a0449f86944cc7e0534dac2327f4f3ff",
+    "corp": "ING",
+    "branch": "ING Bank",
+    "userType": "APPROVER"
+  },
+  {
+    "userName": "tim.taylor@etc.com",
+    "fullName": "Tim Taylor",
+    "displayName": "Tim",
+    "password": "Rino123",
+    "etcToken": {
+      "roles": [
+        {
+          "role": "OPERATOR",
+          "valid": true
+        }
+      ],
+      "corpid": "tim.taylor@etc.com",
+      "uportid": "",
+      "expirydate": null,
+      "activesince": null,
+      "state": "ACTIVE"
+    },
+    "signedEtcTokenByCorp": "0xd55a53df0b0866578e670ca9029da000766f97afa83f8eed681a12f76a4435c64e7ca9b8d882e62e280b6137db98efa1b9c84c2ac74ad5e8687ca8409f3b8eaf1c",
+    "roleKeyMapping": {
+      "OPERATOR": "0x86f0af6620bc2f1d214e5dbd7c7cb301da7b37c7"
+    },
+    "signedRoleKeyMapping": "",
+    "corporateAddress": "0x4a41bdab423c348f6e12d6adf6d64a5395d2ac90",
+    "corp": "SG",
+    "branch": "Société Générale",
+    "userType": "OPERATOR"
+  },
+  {
+    "userName": "john.aforal@etc.com",
+    "fullName": "John Aforal",
+    "displayName": "John",
+    "password": "34Kangaroo",
+    "etcToken": {
+      "roles": [
+        {
+          "role": "APPROVER",
+          "valid": true
+        }
+      ],
+      "corpid": "john.aforal@etc.com",
+      "uportid": "",
+      "expirydate": null,
+      "activesince": null,
+      "state": "ACTIVE"
+    },
+    "signedEtcTokenByCorp": "0x7fba47caf2e2cb700e621e56b57358ca0a9fbab8fd2bbbebad4526387261d71d7b33f9dcfa69d64ab79e2b0ce161ba567e57f7029c18e0effe9cd3d0936ca94e1c",
+    "roleKeyMapping": {
+      "APPROVER": "0x2ae166e1d15083d096b57f72ffb4481ea0b7ae2f"
+    },
+    "signedRoleKeyMapping": "",
+    "corporateAddress": "0x4a41bdab423c348f6e12d6adf6d64a5395d2ac90",
+    "corp": "SG",
+    "branch": "Société Générale",
+    "userType": "APPROVER"
+  },
+  {
+    "userName": "prince.prince@etc.com",
+    "fullName": "Prince Prince",
+    "displayName": "Prince",
+    "password": "prince123",
+    "etcToken": {
+      "roles": [
+        {
+          "role": "OPERATOR",
+          "valid": true
+        }
+      ],
+      "corpid": "prince.prince@etc.com",
+      "uportid": "",
+      "expirydate": null,
+      "activesince": null,
+      "state": "ACTIVE"
+    },
+    "signedEtcTokenByCorp": "",
+    "roleKeyMapping": {
+      "OPERATOR": "0x9bb869556a1d4c02024c7101388fb8c2eff083cb"
+    },
+    "signedRoleKeyMapping": "",
+    "corporateAddress": "0x7ed220f16a4946b48bb2ccfa9fe20d8db0d2b96d",
+    "corp": "ABN",
+    "branch": "ABN AMRO",
+    "userType": "OPERATOR"
+  },
+  {
+    "userName": "barney.barney@etc.com",
+    "fullName": "Barney Barney",
+    "displayName": "Barney",
+    "password": "barney123",
+    "etcToken": {
+      "roles": [
+        {
+          "role": "APPROVER",
+          "valid": true
+        }
+      ],
+      "corpid": "barney.barney@etc.com",
+      "uportid": "",
+      "expirydate": null,
+      "activesince": null,
+      "state": "ACTIVE"
+    },
+    "signedEtcTokenByCorp": "",
+    "roleKeyMapping": {
+      "APPROVER": "0xc58319b209332fb85dc3df41bae5ce4c5688717c"
+    },
+    "signedRoleKeyMapping": "",
+    "corporateAddress": "0x7ed220f16a4946b48bb2ccfa9fe20d8db0d2b96d",
+    "corp": "ABN",
+    "branch": "ABN AMRO",
+    "userType": "APPROVER"
+  },
+  {
+    "userName": "judy.taylor@etc.com",
+    "fullName": "Judy Taylor",
+    "displayName": "Judy",
+    "password": "judy123",
+    "etcToken": {
+      "roles": [
+        {
+          "role": "TRADER",
+          "valid": true
+        }
+      ],
+      "corpid": "judy.taylor@etc.com",
+      "uportid": "",
+      "expirydate": null,
+      "activesince": null,
+      "state": "ACTIVE"
+    },
+    "signedEtcTokenByCorp": "0x1f619b5f4dca9e42ff8770e7532de8bd169f1503edeca4625b3abaaa75844498223219a72983ccfdedd93547c6b46eb78b82bf0e6b2368d3b447b781a00163e31b",
+    "roleKeyMapping": {
+      "TRADER": "0xa819763bcc1962c916702a338ad16b1791cef6de"
+    },
+    "signedRoleKeyMapping": "",
+    "corporateAddress": "0xd9bccad07ee0468d9c96a6254910c04467440795",
+    "corp": "LDC",
+    "branch": "Louis Dreyfus Company B.V",
+    "userType": "TRADER"
+  },
+  {
+    "userName": "carl.carl@etc.com",
+    "fullName": "Carl Carl",
+    "displayName": "Carl",
+    "password": "carl123",
+    "etcToken": {
+      "roles": [
+        {
+          "role": "TRADER",
+          "valid": true
+        }
+      ],
+      "corpid": "carl.carl@etc.com",
+      "uportid": "",
+      "expirydate": null,
+      "activesince": null,
+      "state": "ACTIVE"
+    },
+    "signedEtcTokenByCorp": "0x6796b4a2776c9350ca23e56b4c8bfed12b306a0a5cb4c4ab023588c199e1be4c0a730a54b4bd43ab66b3915784198772d6754f0c48d4239abbccbca3ef55ee8c1b",
+    "roleKeyMapping": {
+      "TRADER": "0xa819763bcc1962c916702a338ad16b1791cef6de"
+    },
+    "signedRoleKeyMapping": "",
+    "corporateAddress": "0xd9bccad07ee0468d9c96a6254910c04467440795",
+    "corp": "LDC",
+    "branch": "Louis Dreyfus Company Suisse SA",
+    "userType": "TRADER"
+  },
+  {
+    "userName": "sam.sam@etc.com",
+    "fullName": "Sam Sam",
+    "displayName": "Sam",
+    "password": "sam123",
+    "etcToken": {
+      "roles": [
+        {
+          "role": "TRADER",
+          "valid": true
+        }
+      ],
+      "corpid": "sam.sam@etc.com",
+      "uportid": "",
+      "expirydate": null,
+      "activesince": null,
+      "state": "ACTIVE"
+    },
+    "signedEtcTokenByCorp": "0xfcbac83b8fcf443c88b667b9ef56466761e8f50156adca7aa2ed6f5f2adad57e1d5b2085e8bec068814e675d3f008dc7008dfdbdb802be22e6eb6259a5804e961c",
+    "roleKeyMapping": {
+      "TRADER": "0xa819763bcc1962c916702a338ad16b1791cef6de"
+    },
+    "signedRoleKeyMapping": "",
+    "corporateAddress": "0xd9bccad07ee0468d9c96a6254910c04467440795",
+    "corp": "LDC",
+    "branch": "LDC Argentina S.A.",
+    "userType": "TRADER"
+  },
+  {
+    "userName": "joseph.joseph@etc.com",
+    "fullName": "Joseph Joseph",
+    "displayName": "Joseph",
+    "password": "joseph123",
+    "etcToken": {
+      "roles": [
+        {
+          "role": "TRADER",
+          "valid": true
+        }
+      ],
+      "corpid": "joseph.joseph@etc.com",
+      "uportid": "",
+      "expirydate": null,
+      "activesince": null,
+      "state": "ACTIVE"
+    },
+    "signedEtcTokenByCorp": "0x6a5d146f2bca699e929b67cfb494a699786baabf3e872eb22c4a2704698f5f2b2366a59288f04b450aaf71d2b388fc62dd3737d02422a3aa8e0194f2155f7e731c",
+    "roleKeyMapping": {
+      "TRADER": "0xa819763bcc1962c916702a338ad16b1791cef6de"
+    },
+    "signedRoleKeyMapping": "",
+    "corporateAddress": "0xd9bccad07ee0468d9c96a6254910c04467440795",
+    "corp": "LDC",
+    "branch": "Louis Dreyfus Company Asia Pte Ltd",
+    "userType": "TRADER"
+  },
+  {
+    "userName": "steve.steve@etc.com",
+    "fullName": "Steve Steve",
+    "displayName": "Steve",
+    "password": "steve123",
+    "etcToken": {
+      "roles": [
+        {
+          "role": "TRADER",
+          "valid": true
+        }
+      ],
+      "corpid": "steve.steve@etc.com",
+      "uportid": "",
+      "expirydate": null,
+      "activesince": null,
+      "state": "ACTIVE"
+    },
+    "signedEtcTokenByCorp": "0xc72262d95096e66efc824d01f436b273128de25d44e8059eea733b6cafce5cfd37ebeee6c79ba113d18069a93860ea6fd228471747134e973efbad57c8e8423d1b",
+    "roleKeyMapping": {
+      "TRADER": "0xe03caf1c65e6dea446a825d404d22b770bb7998d"
+    },
+    "signedRoleKeyMapping": "",
+    "corporateAddress": "0x3ecc87a87f4966b8bb3541d59c361b8ec6c87d3d",
+    "corp": "BOHI",
+    "branch": "BOHI China",
+    "userType": "TRADER"
+  },
+  {
+    "userName": "gary.gary@etc.com",
+    "fullName": "Gary Gary",
+    "displayName": "Gary",
+    "password": "gary123",
+    "etcToken": {
+      "roles": [
+        {
+          "role": "SUPERINTENDENT",
+          "valid": true
+        }
+      ],
+      "corpid": "gary.gary@etc.com",
+      "uportid": "",
+      "expirydate": null,
+      "activesince": null,
+      "state": "ACTIVE"
+    },
+    "signedEtcTokenByCorp": "",
+    "roleKeyMapping": {
+      "SUPERINTENDENT": "0xeabf75a929a06a2ebce07ddd1bb06d29a9a178e2"
+    },
+    "signedRoleKeyMapping": "",
+    "corporateAddress": "0x37be69fbdf84ca381372137424b9bf5cb20accdd",
+    "corp": "RMG",
+    "branch": "RMG",
+    "userType": "SERVICEPROVIDER"
+  },
+  {
+    "userName": "edward.edward@etc.com",
+    "displayName": "Edward",
+    "fullName": "Edward Edward",
+    "password": "edward123",
+    "etcToken": {
+      "roles": [
+        {
+          "role": "PHYTOINSPECTOR",
+          "valid": true
+        }
+      ],
+      "corpid": "edward.edward@etc.com",
+      "uportid": "",
+      "expirydate": null,
+      "activesince": null,
+      "state": "ACTIVE"
+    },
+    "signedEtcTokenByCorp": "",
+    "roleKeyMapping": {
+      "PHYTOINSPECTOR": "0xf83e11deb1668ea055123abb143b8cbfcf11e437"
+    },
+    "signedRoleKeyMapping": "",
+    "corporateAddress": "0xda94a0dd2be504ea5140168c0fa6b079b90cb919",
+    "corp": "USDA",
+    "branch": "US Department of Agriculture",
+    "userType": "SERVICEPROVIDER"
+  },
+  {
+    "userName": "gilfoyle.gilfoyle@etc.com",
+    "fullName": "Gilfoyle Gilfoyle",
+    "displayName": "Gilfoyle",
+    "password": "gilfoyle123",
+    "etcToken": {
+      "roles": [
+        {
+          "role": "GRAININSPECTOR",
+          "valid": true
+        }
+      ],
+      "corpid": "gilfoyle.gilfoyle@etc.com",
+      "uportid": "",
+      "expirydate": null,
+      "activesince": null,
+      "state": "ACTIVE"
+    },
+    "signedEtcTokenByCorp": "",
+    "roleKeyMapping": {
+      "GRAININSPECTOR": "0xf83e11deb1668ea055123abb143b8cbfcf11e437"
+    },
+    "signedRoleKeyMapping": "",
+    "corporateAddress": "0xda94a0dd2be504ea5140168c0fa6b079b90cb919",
+    "corp": "USDA",
+    "branch": "US Department of Agriculture",
+    "userType": "SERVICEPROVIDER"
+  },
+  {
+    "userName": "jaime.jaime@etc.com",
+    "fullName": "Jaime Jaime",
+    "displayName": "Jaime",
+    "password": "jaime123",
+    "etcToken": {
+      "roles": [
+        {
+          "role": "SHIPPINGAGENT",
+          "valid": true
+        }
+      ],
+      "corpid": "jaime.jaime@etc.com",
+      "uportid": "",
+      "expirydate": null,
+      "activesince": null,
+      "state": "ACTIVE"
+    },
+    "signedEtcTokenByCorp": "",
+    "roleKeyMapping": {
+      "SHIPPINGAGENT": "0x7c5f11c01a9303ec59dc1416b8b59797f23b353d"
+    },
+    "signedRoleKeyMapping": "",
+    "corporateAddress": "0xa13b94f31f42a6869757ac6b9fe7c7893fd4747e",
+    "corp": "BWS",
+    "branch": "Blue Water Shipping Company",
+    "userType": "SERVICEPROVIDER"
+  }
+]

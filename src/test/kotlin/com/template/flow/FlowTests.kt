@@ -2,7 +2,7 @@ package com.template.flow
 
 
 
-import com.etc.SaleCreateResponder
+import com.etc.contract.states.SaleCreateResponder
 import net.corda.node.internal.StartedNode
 import net.corda.testing.node.MockNetwork
 import net.corda.testing.node.MockNetwork.MockNode

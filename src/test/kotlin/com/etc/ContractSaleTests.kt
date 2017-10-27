@@ -1,6 +1,8 @@
 package com.etc
 
 
+import com.etc.contract.SalesContract
+import com.etc.contract.states.SalesState
 import net.corda.core.crypto.Crypto
 import net.corda.core.identity.CordaX500Name
 import net.corda.core.identity.Party

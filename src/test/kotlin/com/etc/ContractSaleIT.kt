@@ -1,6 +1,8 @@
 package com.etc
 
 
+import com.etc.contract.states.SaleCreateFlow
+import com.etc.contract.states.SalesState
 import io.restassured.RestAssured.given
 import io.restassured.http.ContentType.JSON
 import org.hamcrest.MatcherAssert.assertThat
@@ -86,7 +88,7 @@ class IntegrationTestSmartLC {
     fun `should able to contact WebApi Server`() {
         driver {
             val seller = User("seller", "testPassword1", permissions = setOf(
-                    startFlowPermission<SaleCreateFlow>()
+                    startFlowPermission<com.etc.contract.states.SaleCreateFlow>()
             ))
 
             val (sellerNode) = listOf(
@@ -104,7 +106,7 @@ class IntegrationTestSmartLC {
 
         driver {
             val seller = User("seller", "testPassword1", permissions = setOf(
-                    startFlowPermission<SaleCreateFlow>()
+                    startFlowPermission<com.etc.contract.states.SaleCreateFlow>()
             ))
 
             val (sellerNode) = listOf(
@@ -129,11 +131,11 @@ class IntegrationTestSmartLC {
 
         driver(isDebug = true) {
             val seller = User("seller", "testPassword1", permissions = setOf(
-                    startFlowPermission<SaleCreateFlow>()
+                    startFlowPermission<com.etc.contract.states.SaleCreateFlow>()
             ))
 
             val buyer = User("buyer", "testPassword1", permissions = setOf(
-                    startFlowPermission<SaleCreateFlow>()
+                    startFlowPermission<com.etc.contract.states.SaleCreateFlow>()
             ))
 
             val (sellerNode, buyerNode, notaryNode) = listOf(
@@ -159,11 +161,11 @@ class IntegrationTestSmartLC {
 
         driver(isDebug = true) {
             val seller = User("seller", "testPassword1", permissions = setOf(
-                    startFlowPermission<SaleCreateFlow>()
+                    startFlowPermission<com.etc.contract.states.SaleCreateFlow>()
             ))
 
             val buyer = User("buyer", "testPassword1", permissions = setOf(
-                    startFlowPermission<SaleCreateFlow>()
+                    startFlowPermission<com.etc.contract.states.SaleCreateFlow>()
             ))
 
             val (sellerNode, buyerNode, notaryNode) = listOf(
@@ -203,11 +205,11 @@ class IntegrationTestSmartLC {
 
         driver {
             val seller = User("seller", "testPassword1", permissions = setOf(
-                    startFlowPermission<SaleCreateFlow>()
+                    startFlowPermission<com.etc.contract.states.SaleCreateFlow>()
             ))
 
             val buyer = User("buyer", "testPassword1", permissions = setOf(
-                    startFlowPermission<SaleCreateFlow>()
+                    startFlowPermission<com.etc.contract.states.SaleCreateFlow>()
             ))
 
             val (sellerNode, buyerNode, notaryNode) = listOf(
@@ -256,11 +258,11 @@ class IntegrationTestSmartLC {
 
         driver {
             val seller = User("seller", "testPassword1", permissions = setOf(
-                    startFlowPermission<SaleCreateFlow>()
+                    startFlowPermission<com.etc.contract.states.SaleCreateFlow>()
             ))
 
             val buyer = User("buyer", "testPassword1", permissions = setOf(
-                    startFlowPermission<SaleCreateFlow>()
+                    startFlowPermission<com.etc.contract.states.SaleCreateFlow>()
             ))
 
             val (sellerNode, buyerNode, notaryNode) = listOf(
@@ -308,11 +310,11 @@ class IntegrationTestSmartLC {
 
         driver {
             val seller = User("seller", "testPassword1", permissions = setOf(
-                    startFlowPermission<SaleCreateFlow>()
+                    startFlowPermission<com.etc.contract.states.SaleCreateFlow>()
             ))
 
             val buyer = User("buyer", "testPassword1", permissions = setOf(
-                    startFlowPermission<SaleCreateFlow>()
+                    startFlowPermission<com.etc.contract.states.SaleCreateFlow>()
             ))
 
 
